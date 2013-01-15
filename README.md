@@ -10,14 +10,14 @@ This plugin uses Python to interface with libClang, so make sure that your Vim
 version was compiled with Python support. If `:version` includes `+python` you
 are good to go.
 Currently this plugin requires the
-[XPTemplate][https://github.com/drmingdrmer/xptemplate] plugin to be
+[XPTemplate](https://github.com/drmingdrmer/xptemplate) plugin to be
 installed. In the future this will be configurable and it will be possible to
 insert basic, i.e. without place-holders, Doxygen comments without XPTemplate.
 
 ## Installation
 
 Install to your `~/.vim` (`~\vimfiles` on Windows) folder or better use a
-plugin manager like [pathogen.vim][https://github.com/tpope/vim-pathogen].
+plugin manager like [pathogen.vim](https://github.com/tpope/vim-pathogen).
 
 ## Usage
 
