@@ -1,0 +1,117 @@
+*clang_doxygen.txt*	For Vim version 7.3.  Last change: 2013 Jan 15
+
+
+	       CLANG DOXYGEN PLUGIN MANUAL    by Sven Strothoff
+
+
+Help on clang doxygen plugin				*clang_doxygen*
+
+1. Introduction			|clang_doxygen-introduction|
+2. Requirements			|clang_doxygen-requirements|
+3. Usage			|clang_doxygen-usage|
+4. Caveats			|clang_doxygen-caveats|
+5. Acknowledgements		|clang_doxygen-acknowledgements|
+6. License			|clang_doxygen-license|
+
+==============================================================================
+1. Introduction					*clang_doxygen-introduction*
+
+The clang doxygen plugin creates Doxygen comments for C/C++ code.
+
+Why another Doxygen plugin?~
+
+While I was looking for a vim plugin to help me document my C++ source code I
+looked at the several plugins that are available.  All had some restrictions
+or shortcomings, so that I was not really happy with the available plugins.
+Also none of the plugins seemed to be actively maintained, so there was little
+hope for improvement.
+At the same time I was testing the XPTemplate plugin for inserting code
+snippets.  Then a crazy idea was born.  What if it was possibly to create a
+/dynamic/ snippet to comfortably enter the documentation into the Doxygen
+comment?  After a few hacks and proof-of-concept implementation this plugin
+was born.
+
+Why does this plugin depend on libClang?~
+
+As correctly parsing C++ is very hard, one of the reasons why the other
+Doxygen plugins fail in some cases, the work is left to the professionals of
+the Clang development team, see |clang_doxygen-prequesites|.
+
+==============================================================================
+2. Requirements					*clang_doxygen-requirements*
+
+The C interface to the Clang compiler (libClang) is used to parse the source
+code and extract information like parameter names and return type.  For this
+plugin libClang version 3.0 or greater must be installed on the system.
+
+==============================================================================
+3. Usage					*clang_doxygen-usage*
+
+							*GenerateDoxygen*
+:GenerateDoxygen	Generate Doxygen comment for the declaration at the
+			current cursor position.  If the cursor is placed in
+			leading whitespace a declaration a declaration will be
+			searched to the right on the same line.
+
+==============================================================================
+4. Caveats					*clang_doxygen-caveats*
+
+The libClang Python bindings of the Clang project are included in this plugins
+distribution.  The included Python module should be preferred over versions
+present on the users' system.  However there might be other plugins that also
+include the Python bindings in their distribution.  The version of the module
+that is loaded by Vim then depends on the order in which the plugins are
+loaded. As long as the loaded version of the module includes all the
+functionality needed by clang Doxygen you should be fine.  However, if other
+plugins depend on a newer version of the Python module this might cause a
+problem.
+The only plugin known by the author that includes the libClang Python bindings
+is clang complete (http://www.vim.org/scripts/script.php?script_id=3302) by
+Xavier Deguillard.  Version 1.8 of clang complete plays along nicely with
+clang doxygen.
+
+==============================================================================
+5. Acknowledgements			*clang_doxygen-acknowledgements*
+
+This plugin was heavily inspired by:
+* DoxygenToolkit.vim	by Mathias Lorente
+  http://www.vim.org/scripts/script.php?script_id=987
+* clang complete		by Xavier Deguillard
+  http://www.vim.org/scripts/script.php?script_id=3302
+
+The author would also like to thank drdr xp, the author of the XPTemplate
+plugin, the Clang development team and Bram for making this awesome editor!
+
+==============================================================================
+6. License					*clang_doxygen-license*
+
+Copyright (c) 2013, Sven Strothoff
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of Sven Strothoff nor the names of contributors to
+      this software may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL SVEN STROTHOFF BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Note: This license does not cover the files that come from the LLVM project,
+namely, cindex.py, enumerations.py and __init__.py, which are covered by the
+LLVM license.
+
+ vim:tw=78:ts=8:ft=help:norl:
