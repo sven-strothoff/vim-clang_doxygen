@@ -1,5 +1,5 @@
 # Vim plugin for generating Doxygen comments
-# Last Change:  2013 Jan 14
+# Last Change:  2013 Jan 18
 # Maintainer:   Sven Strothoff <sven.strothoff@googlemail.com>
 # License:      See documentation (clang_doxygen.txt)
 # 
@@ -12,11 +12,13 @@ from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKi
 # Generate doxygen comments for a function declaration.
 # Also generates XPTemplate placeholders.
 def handleFunctionDecl(c):
+  tabStopCounter = 1
   doxygenLines = []
   functionName = c.spelling
-  doxygenLines.append("/// \\brief `" + functionName + "^")
+  doxygenLines.append("/// \\brief ${" + str(tabStopCounter) + ":" + functionName + "}")
+  tabStopCounter += 1
   doxygenLines.append("/// ")
-  doxygenLines.append("/// `cursor^")
+  doxygenLines.append("/// $0")
 
   # Extract parameters.
   # Only supported by libClang >= 3.1
@@ -28,7 +30,8 @@ def handleFunctionDecl(c):
   for arg in children:
     if arg.kind != CursorKind.PARM_DECL:
       continue
-    paramLines.append("/// \\param `" + arg.spelling + "^")
+    paramLines.append("/// \\param " + arg.spelling + " ${" + str(tabStopCounter) + ":" + arg.spelling + "}")
+    tabStopCounter += 1
   if len(paramLines) > 0:
     doxygenLines.append("/// ")
   doxygenLines += paramLines
@@ -36,11 +39,14 @@ def handleFunctionDecl(c):
   # Check result type.
   if (c.type.get_result().kind != TypeKind.VOID):
     doxygenLines.append("/// ")
-    doxygenLines.append("/// \\return `" + c.type.get_result().kind.spelling + "^")
+    doxygenLines.append("/// \\return ${" + str(tabStopCounter) + ":" + c.type.get_result().kind.spelling + "}")
+    tabStopCounter += 1
 
-  # Add indentation. Comment indentation matches the indentation of the
-  # line containing the declaration name.
-  tabCount = vim.current.buffer[c.extent.start.line - 1][:c.extent.start.column - 1].count('\t')
+  # Add indentation.
+  # Comment indentation should match the indentation of the line containing the
+  # declaration name, however clang_getSpellingLocation() ist note exposed by
+  # the Python bindings.
+  tabCount = vim.current.buffer[c.location.line - 1][:c.location.column - 1].count('\t')
   indent = (c.extent.start.column - 1 - tabCount) + tabCount * int(vim.eval("&tabstop"))
   indentString = indent * " "
   for l in xrange(0, len(doxygenLines)):
@@ -62,11 +68,13 @@ def getBufferContent(startLine, startCol, endLine, endCol):
 # Generate doxygen comments for a function template.
 # Also generates XPTemplate placeholders.
 def handleFunctionTemplate(c):
+  tabStopCounter = 1
   doxygenLines = []
   functionName = c.spelling
-  doxygenLines.append("/// \\brief `" + functionName + "^")
+  doxygenLines.append("/// \\brief ${" + str(tabStopCounter) + ":" + functionName + "}")
+  tabStopCounter += 1
   doxygenLines.append("/// ")
-  doxygenLines.append("/// `cursor^")
+  doxygenLines.append("/// $0")
 
   # Extract parameters.
   paramLines = []
@@ -74,7 +82,8 @@ def handleFunctionTemplate(c):
   for arg in children:
     if arg.kind != CursorKind.PARM_DECL:
       continue
-    paramLines.append("/// \\param `" + arg.spelling + "^")
+    paramLines.append("/// \\param " + arg.spelling + " ${" + str(tabStopCounter) + ":" + arg.spelling + "}")
+    tabStopCounter += 1
   if len(paramLines) > 0:
     doxygenLines.append("/// ")
   doxygenLines += paramLines
@@ -100,11 +109,14 @@ def handleFunctionTemplate(c):
   resultString = re.sub(blockCommentRegex, "", "\n".join(resultLines))
   if re.search(r"void", resultString) is None:
     doxygenLines.append("/// ")
-    doxygenLines.append("/// \\return `" + resultString.strip().replace('\n', '') + "^")
+    doxygenLines.append("/// \\return ${" + str(tabStopCounter) + ":" + c.type.get_result().kind.spelling + "}")
+    tabStopCounter += 1
 
-  # Add indentation. Comment indentation matches the indentation of the
-  # declaration name.
-  tabCount = vim.current.buffer[c.extent.start.line - 1][:c.extent.start.column - 1].count('\t')
+  # Add indentation.
+  # Comment indentation should match the indentation of the line containing the
+  # declaration name, however clang_getSpellingLocation() ist note exposed by
+  # the Python bindings.
+  tabCount = vim.current.buffer[c.location.line - 1][:c.location.column - 1].count('\t')
   indent = (c.extent.start.column - 1 - tabCount) + tabCount * int(vim.eval("&tabstop"))
   indentString = indent * " "
   for l in xrange(0, len(doxygenLines)):
@@ -119,7 +131,16 @@ def previousSourceLocation(line, col):
     return (line, col - 1)
   if line == 1:
     return None
-  return (line -1, len(vim.current.buffer[line - 2]))
+  return (line - 1, len(vim.current.buffer[line - 2]))
+
+# Returns the next source location or None if already at the end of
+# the buffer.
+def nextSourceLocation(line, col):
+  if col < len(vim.current.buffer[line - 1]):
+    return (line, col + 1)
+  if line == len(vim.current.buffer):
+    return None
+  return (line + 1, 1)
 
 # Generate doxygen for declaration at specified source location.
 # Returns a tuple consisting of the line number at which the doxygen comment
@@ -128,7 +149,7 @@ def generateDoxygenForSourceLocation(line, col):
   filename = vim.current.buffer.name
 
   index = Index.create()
-  tu = index.parse(filename, ["-std=c++11"], [(filename, "\n".join(vim.current.buffer[:]))])
+  tu = index.parse(filename, vim.eval("g:clang_doxygen_clang_args"), [(filename, "\n".join(vim.current.buffer[:]))])
 
   # Skip whitespace at beginning of line
   indent = re.match(r'^\s*', vim.current.buffer[line - 1]).span()[1]
@@ -140,7 +161,7 @@ def generateDoxygenForSourceLocation(line, col):
   while c is not None and c.kind != CursorKind.FUNCTION_DECL and c.kind != CursorKind.FUNCTION_TEMPLATE:
     # If cursor is on a TypeRef in a FunctionTemplate manually go backwards in the source.
     if c.kind == CursorKind.TYPE_REF:
-      pLine, pCol = previousCursorPosition(c.extent.start.line, c.extent.start.column)
+      pLine, pCol = previousSourceLocation(c.extent.start.line, c.extent.start.column)
       c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), pLine, pCol))
       continue
     c = c.lexical_parent
@@ -153,26 +174,15 @@ def generateDoxygenForSourceLocation(line, col):
   elif c.kind == CursorKind.FUNCTION_TEMPLATE:
     return handleFunctionTemplate(c)
 
-def listToVimListString(l):
-  string = "[\""
-  string += "\", \"".join(l)
-  string += "\"]"
-  string = string.replace("\\", "\\\\")
-  return string
-
 # Generate Doxygen comments for the current source location.
-# Optionally define and trigger an XPTemplate.
-def generateDoxygen(use_XPTemplate):
-  # first line is 1, first column is 0
+def generateDoxygen():
+  # First line is 1, first column is 0
   (line, col) = vim.current.window.cursor
 
-  if use_XPTemplate:
-    (insertLine, doxygenLines) = generateDoxygenForSourceLocation(line, col + 1)
-    if doxygenLines is None:
-      return
-    vim.command('call XPTemplate("clang_doxygen_template", ' + listToVimListString(doxygenLines) + ')')
-    vim.current.buffer.append("", insertLine - 1)
-    vim.current.window.cursor = (insertLine, 0)
-    vim.command('call XPTtgr("clang_doxygen_template")')
-  else:
-    print "Not implemented yet."
+  (insertLine, doxygenLines) = generateDoxygenForSourceLocation(line, col + 1)
+  if doxygenLines is None:
+    return
+  vim.current.buffer.append("", insertLine - 1)
+  vim.current.window.cursor = (insertLine, 0)
+  # Call snippet plugin
+  vim.command('call clang_doxygen_snippets#' + vim.eval("g:clang_doxygen_snippet_plugin") + '#trigger(\'' + "\n".join(doxygenLines).replace("\\", "\\\\") + '\')')
