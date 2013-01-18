@@ -164,6 +164,10 @@ def generateDoxygenForSourceLocation(line, col):
       pLine, pCol = previousSourceLocation(c.extent.start.line, c.extent.start.column)
       c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), pLine, pCol))
       continue
+    elif c.kind == CursorKind.NAMESPACE_REF:
+      nLine, nCol = nextSourceLocation(c.extent.end.line, c.extent.end.column)
+      c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), nLine, nCol))
+      continue
     c = c.lexical_parent
 
   if c is None:
