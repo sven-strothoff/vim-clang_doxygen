@@ -19,6 +19,9 @@ Help on clang doxygen plugin				*clang_doxygen*
 
 The clang doxygen plugin creates Doxygen comments for C/C++ code.
 
+Optionally clang doxygen can generate placeholders and trigger a snippet
+plugin, so that you can quickly enter your documentaion.
+
 Why another Doxygen plugin?~
 
 While I was looking for a vim plugin to help me document my C++ source code I
@@ -43,6 +46,13 @@ the Clang development team, see |clang_doxygen-requirements|.
 The C interface to the Clang compiler (libClang) is used to parse the source
 code and extract information like parameter names and return type.  For this
 plugin libClang version 3.0 or greater must be installed on the system.
+This plugin uses the Python bindings for accessing libClang, so make sure that
+your version of Vim was compiled with Python support. If |:version| includes
+|+python| you are good to go.
+
+To generate placeholders and use a snippet plugin when generating Doxygen
+comments, one of the supported snippet plugins has to be installed, see
+|g:clang_doxygen_snippet_plugin|.
 
 ==============================================================================
 3. Usage					*clang_doxygen-usage*

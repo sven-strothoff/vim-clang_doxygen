@@ -6,13 +6,14 @@ Generate Doxygen comments for your C/C++ code.
 
 You need to have libClang (Version 3.0 or higher) installed on your system for
 this plugin to work.
+
 This plugin uses Python to interface with libClang, so make sure that your Vim
 version was compiled with Python support. If `:version` includes `+python` you
 are good to go.
-Currently this plugin requires the
-[XPTemplate](https://github.com/drmingdrmer/xptemplate) plugin to be
-installed. In the future this will be configurable and it will be possible to
-insert basic, i.e. without place-holders, Doxygen comments without XPTemplate.
+
+If you want to have clang doxygen generate placeholders, so that you can qickly
+enter your documentation, you need one of the supported snippet plugins.  See
+`:help g:clang_doxygen_snippet_plugin`.
 
 ## Installation
 
@@ -22,8 +23,7 @@ plugin manager like [pathogen.vim](https://github.com/tpope/vim-pathogen).
 ## Usage
 
 Move the cursor onto a function declaration and run `:GenerateDoxygen`. This
-will parse your source file and create and insert an XPTemplate, so that you
-just have to replace the place-holders with your documentation.
+will parse your source file and generate and insert a Doxygen comment.
 
 For more information see `:help clang_doxygen`.
 
