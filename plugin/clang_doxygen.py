@@ -1,5 +1,5 @@
 # Vim plugin for generating Doxygen comments
-# Last Change:  2013 Jan 18
+# Last Change:  2013 Jan 24
 # Maintainer:   Sven Strothoff <sven.strothoff@googlemail.com>
 # License:      See documentation (clang_doxygen.txt)
 # 
@@ -8,6 +8,43 @@
 
 import vim
 from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKind
+
+# Generate doxygen comments for a class declaration.
+def handleClassDecl(c):
+  tabStopCounter = 1
+  doxygenLines = []
+  className = c.spelling
+
+  # Class name
+  if vim.eval("g:clang_doxygen_comment_block") == "1":
+    if vim.eval("g:clang_doxygen_block_no_newline") == "1":
+      doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
+    else:
+      doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
+      doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+  else:
+    doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+
+  doxygenLines[-1] += vim.eval("g:clang_doxygen_tag_brief") + "${" + str(tabStopCounter) + ":" + className + "}"
+  tabStopCounter += 1
+  doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+  doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle") + "$0")
+
+  # Close block comment
+  if vim.eval("g:clang_doxygen_comment_block") == "1":
+    doxygenLines.append(vim.eval("g:clang_doxygen_block_end"))
+
+  # Add indentation.
+  # Comment indentation should match the indentation of the line containing the
+  # declaration name, however clang_getSpellingLocation() ist note exposed by
+  # the Python bindings.
+  tabCount = vim.current.buffer[c.location.line - 1][:c.location.column - 1].count('\t')
+  indent = (c.extent.start.column - 1 - tabCount) + tabCount * int(vim.eval("&tabstop"))
+  indentString = indent * " "
+  for l in xrange(0, len(doxygenLines)):
+    doxygenLines[l] = indentString + doxygenLines[l]
+
+  return (c.extent.start.line, doxygenLines)
 
 # Generate doxygen comments for a function declaration.
 def handleFunctionDecl(c):
@@ -186,8 +223,8 @@ def generateDoxygenForSourceLocation(line, col):
       return handleFunctionDecl(c)
     elif c.kind == CursorKind.FUNCTION_TEMPLATE:
       return handleFunctionTemplate(c)
-
-  if c is None:
+    elif c.kind == CursorKind.CLASS_DECL:
+      return handleClassDecl(c)
     # Cursor is not on a supported type, go to the lexical parent
     else:
       c = c.lexical_parent

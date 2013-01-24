@@ -1,5 +1,5 @@
 " Vim plugin for generating Doxygen comments
-" Last Change:  2013 Jan 18
+" Last Change:  2013 Jan 24
 " Maintainer:   Sven Strothoff <sven.strothoff@googlemail.com>
 " License:      See documentation (clang_doxygen.txt)
 " 
