@@ -10,15 +10,25 @@ import vim
 from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKind
 
 # Generate doxygen comments for a function declaration.
-# Also generates XPTemplate placeholders.
 def handleFunctionDecl(c):
   tabStopCounter = 1
   doxygenLines = []
   functionName = c.spelling
-  doxygenLines.append("/// \\brief ${" + str(tabStopCounter) + ":" + functionName + "}")
+
+  # Function name
+  if vim.eval("g:clang_doxygen_comment_block") == "1":
+    if vim.eval("g:clang_doxygen_block_no_newline") == "1":
+      doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
+    else:
+      doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
+      doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+  else:
+    doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+
+  doxygenLines[-1] += vim.eval("g:clang_doxygen_tag_brief") + "${" + str(tabStopCounter) + ":" + functionName + "}"
   tabStopCounter += 1
-  doxygenLines.append("/// ")
-  doxygenLines.append("/// $0")
+  doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+  doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle") + "$0")
 
   # Extract parameters.
   # Only supported by libClang >= 3.1
@@ -30,17 +40,21 @@ def handleFunctionDecl(c):
   for arg in children:
     if arg.kind != CursorKind.PARM_DECL:
       continue
-    paramLines.append("/// \\param " + arg.spelling + " ${" + str(tabStopCounter) + ":" + arg.spelling + "}")
+    paramLines.append(vim.eval("g:clang_doxygen_comment_middle") + vim.eval("g:clang_doxygen_tag_param") + arg.spelling + " ${" + str(tabStopCounter) + ":" + arg.spelling + "}")
     tabStopCounter += 1
   if len(paramLines) > 0:
-    doxygenLines.append("/// ")
+    doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
   doxygenLines += paramLines
 
   # Check result type.
-  if (c.type.get_result().kind != TypeKind.VOID):
-    doxygenLines.append("/// ")
-    doxygenLines.append("/// \\return ${" + str(tabStopCounter) + ":" + c.type.get_result().kind.spelling + "}")
+  if c.type.get_result().kind != TypeKind.VOID:
+    doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle"))
+    doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle") + vim.eval("g:clang_doxygen_tag_return") + "${" + str(tabStopCounter) + ":" + c.type.get_result().kind.spelling + "}")
     tabStopCounter += 1
+
+  # Close block comment
+  if vim.eval("g:clang_doxygen_comment_block") == "1":
+    doxygenLines.append(vim.eval("g:clang_doxygen_block_end"))
 
   # Add indentation.
   # Comment indentation should match the indentation of the line containing the
@@ -66,7 +80,6 @@ def getBufferContent(startLine, startCol, endLine, endCol):
   return resultLines
 
 # Generate doxygen comments for a function template.
-# Also generates XPTemplate placeholders.
 def handleFunctionTemplate(c):
   tabStopCounter = 1
   doxygenLines = []
@@ -158,25 +171,30 @@ def generateDoxygenForSourceLocation(line, col):
   c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), line, col))
 
   # If there is no declaration at the source location try to find the nearest one.
-  while c is not None and c.kind != CursorKind.FUNCTION_DECL and c.kind != CursorKind.FUNCTION_TEMPLATE:
-    # If cursor is on a TypeRef in a FunctionTemplate manually go backwards in the source.
+  while c is not None:
+    # If cursor is on a TypeRef in a FunctionTemplate, manually go backward in the source.
     if c.kind == CursorKind.TYPE_REF:
       pLine, pCol = previousSourceLocation(c.extent.start.line, c.extent.start.column)
       c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), pLine, pCol))
       continue
+    # If cursor is on a NamespaceRef, manually go forward in the source.
     elif c.kind == CursorKind.NAMESPACE_REF:
       nLine, nCol = nextSourceLocation(c.extent.end.line, c.extent.end.column)
       c = Cursor.from_location(tu, SourceLocation.from_position(tu, File.from_name(tu, filename), nLine, nCol))
       continue
-    c = c.lexical_parent
+    elif c.kind == CursorKind.FUNCTION_DECL:
+      return handleFunctionDecl(c)
+    elif c.kind == CursorKind.FUNCTION_TEMPLATE:
+      return handleFunctionTemplate(c)
 
   if c is None:
-    print "Error: No function decl found at %s:%i,%i.\n" % (filename, line, col)
+    # Cursor is not on a supported type, go to the lexical parent
+    else:
+      c = c.lexical_parent
+
+  if c is None:
+    print "Error: No supported declaration found at %s:%i,%i.\n" % (filename, line, col)
     return (None, None)
-  elif c.kind == CursorKind.FUNCTION_DECL:
-    return handleFunctionDecl(c)
-  elif c.kind == CursorKind.FUNCTION_TEMPLATE:
-    return handleFunctionTemplate(c)
 
 # Generate Doxygen comments for the current source location.
 def generateDoxygen():
