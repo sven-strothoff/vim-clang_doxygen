@@ -1,4 +1,4 @@
-*clang_doxygen.txt*	For Vim version 7.3.	Last change: 2013 Jan 18
+*clang_doxygen.txt*	For Vim version 7.3.	Last change: 2013 Jan 24
 
 
 	    CLANG DOXYGEN PLUGIN MANUAL    by Sven Strothoff~
@@ -94,6 +94,117 @@ comments, one of the supported snippet plugins has to be installed, see
 	doxygen uses the UltiSnips syntax, so you might have to transform it
 	before passing it to the snippet plugin of your choice. Look at the
 	existing scripts to get you started.
+
+
+Options affecting comment style~
+
+					*'g:clang_doxygen_comment_style'*
+'g:clang_doxygen_comment_style'		string (default: "c++")
+					global
+	Set the type of comments that are used by default.  Currently "c++"
+	and "c" are supported.
+	This only sets the default comment style used by clang doxygen if you
+	do not want to customize everything.  If you don't like the default
+	styles simply create your custom configuration using the other
+	options.
+	Example: Default c++ style: >
+		/// \brief Foo
+		///
+		/// Bar.
+<
+	Example: Default c style: >
+		/**
+		  * \brief Foo
+		  *
+		  * Bar.
+		  */
+<
+	Note: 'g:clang_doxygen_comment_style' sets the following options:
+	Option                           | c style | c++ style
+	-------------------------------------------------------
+	'g:clang_doxygen_use_block'      | 1       | 0
+	'g:clang_doxygen_block_start'    | "/** "  | "/// "
+	'g:clang_doxygen_comment_middle' | "  * "  | "/// "
+	'g:clang_doxygen_block_end'      | "  */"  | "/// "
+
+					*'g:clang_doxygen_use_block'*
+'g:clang_doxygen_use_block'		integer (default: 0 or 1)
+					global
+	Tell clang doxygen if you want block style comments, i.e. c style, or
+	not, i.e. c++ style.  A value of 1 means use block comments, a value
+	of 0 disables them.
+	The default value depends on the value of
+	'g:clang_doxygen_comment_style'.  If set to "c++" block comments will
+	be diabled by default, if set to "c" they will be enabled.
+	See also 'g:clang_doxygen_block_no_newline'.
+	Example: Comment contruction in block mode: >
+		[block_start]
+		[comment_middle] ...
+		...
+		[block_end]
+<
+	Example: Comment construction in non-block mode: >
+		[comment_middle] ...
+		...
+<
+	Note: C style comments will only work in block mode!
+
+					*'g:clang_doxygen_block_no_newline'*
+'g:clang_doxygen_block_no_newline'	integer (default: 0)
+					global
+	If you don't want a newline after the start of a block comment set
+	this option to 1.  This option has no effect if
+	'g:clang_doxygen_use_block' is set to 0.
+	Example: No newline after block comment start: >
+		/** \brief Foo
+		  * 
+		  * Bar.
+		  */
+<
+	Note: The block comment end is always on a new line.
+
+					*'g:clang_doxygen_comment_middle'*
+'g:clang_doxygen_comment_middle'	string (default: "  * " or "/// ")
+					global
+	Set the string used in the middle of block comments and for each line
+	in non-block comments.
+
+	Note: The default value depends on the value of
+	'g:clang_doxygen_comment_style'.
+
+					*'g:clang_doxygen_block_start'*
+'g:clang_doxygen_block_start'		string (default: "/** " or "/// ")
+					global
+	Set the string used to start a new block comment.
+
+	Note: The default value depends on the value of
+	'g:clang_doxygen_comment_style'.
+
+					*'g:clang_doxygen_block_end'*
+'g:clang_doxygen_block_end'		string (default: "  */" or "/// ")
+					global
+	Set the string used to end a block comment.
+
+	Note: The default value depends on the value of
+	'g:clang_doxygen_comment_style'.
+
+
+Options for customising Doxygen tags~
+
+					*'g:clang_doxygen_tag_brief'*
+'g:clang_doxygen_tag_brief'		string (default: "\\brief ")
+					global
+	The string used for the brief part of the comment.
+
+					*'g:clang_doxygen_tag_param'*
+'g:clang_doxygen_tag_param'		string (default: "\\param ")
+					global
+	The string used for the param part of the comment.
+
+					*'g:clang_doxygen_tag_return'*
+'g:clang_doxygen_tag_return'		string (default: "\\return ")
+					global
+	The string used for the return part of the comment.
 
 ==============================================================================
 5. Caveats					*clang_doxygen-caveats*
