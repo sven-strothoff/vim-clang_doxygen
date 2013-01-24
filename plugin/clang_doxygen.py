@@ -16,7 +16,7 @@ def handleClassDecl(c):
   className = c.spelling
 
   # Class name
-  if vim.eval("g:clang_doxygen_comment_block") == "1":
+  if vim.eval("g:clang_doxygen_use_block") == "1":
     if vim.eval("g:clang_doxygen_block_no_newline") == "1":
       doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
     else:
@@ -31,7 +31,7 @@ def handleClassDecl(c):
   doxygenLines.append(vim.eval("g:clang_doxygen_comment_middle") + "$0")
 
   # Close block comment
-  if vim.eval("g:clang_doxygen_comment_block") == "1":
+  if vim.eval("g:clang_doxygen_use_block") == "1":
     doxygenLines.append(vim.eval("g:clang_doxygen_block_end"))
 
   # Add indentation.
@@ -53,7 +53,7 @@ def handleFunctionDecl(c):
   functionName = c.spelling
 
   # Function name
-  if vim.eval("g:clang_doxygen_comment_block") == "1":
+  if vim.eval("g:clang_doxygen_use_block") == "1":
     if vim.eval("g:clang_doxygen_block_no_newline") == "1":
       doxygenLines.append(vim.eval("g:clang_doxygen_block_start"))
     else:
@@ -90,7 +90,7 @@ def handleFunctionDecl(c):
     tabStopCounter += 1
 
   # Close block comment
-  if vim.eval("g:clang_doxygen_comment_block") == "1":
+  if vim.eval("g:clang_doxygen_use_block") == "1":
     doxygenLines.append(vim.eval("g:clang_doxygen_block_end"))
 
   # Add indentation.

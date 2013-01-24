@@ -46,8 +46,8 @@ endif
 
 " Configuration of comment style
 if g:clang_doxygen_comment_style ==# "c++"
-  if !exists("g:clang_doxygen_comment_block")
-    let g:clang_doxygen_comment_block = 0
+  if !exists("g:clang_doxygen_use_block")
+    let g:clang_doxygen_use_block = 0
   endif
 
   if !exists("g:clang_doxygen_comment_middle")
@@ -55,15 +55,15 @@ if g:clang_doxygen_comment_style ==# "c++"
   endif
 
   if !exists("g:clang_doxygen_block_start")
-    let g:clang_doxygen_block_start = "// ---------------------------------------------------------------------------"
+    let g:clang_doxygen_block_start = "/// "
   endif
 
   if !exists("g:clang_doxygen_block_end")
-    let g:clang_doxygen_block_end = "// ---------------------------------------------------------------------------"
+    let g:clang_doxygen_block_end = "/// "
   endif
 else
-  if !exists("g:clang_doxygen_comment_block")
-    let g:clang_doxygen_comment_block = 1
+  if !exists("g:clang_doxygen_use_block")
+    let g:clang_doxygen_use_block = 1
   endif
 
   if !exists("g:clang_doxgen_comment_middle")
@@ -71,11 +71,11 @@ else
   endif
 
   if !exists("g:clang_doxygen_block_start")
-    let g:clang_doxygen_block_start = "/** -----------------------------------------------------------------------"
+    let g:clang_doxygen_block_start = "/** "
   endif
 
   if !exists("g:clang_doxygen_block_end")
-    let g:clang_doxygen_block_end = "  * ---------------------------------------------------------------------*/"
+    let g:clang_doxygen_block_end = "  */"
   endif
 endif
 
