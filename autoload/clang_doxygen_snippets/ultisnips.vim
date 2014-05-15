@@ -7,5 +7,5 @@
 " All rights reserved.
 
 function! clang_doxygen_snippets#ultisnips#trigger(snippet)
-  call UltiSnips_Anon(a:snippet)
+  call UltiSnips#Anon(a:snippet)
 endfunction
