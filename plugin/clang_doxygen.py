@@ -8,6 +8,7 @@
 
 import vim
 from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKind
+import re
 
 # Generate doxygen comments for a class declaration.
 def handleClassDecl(c):
