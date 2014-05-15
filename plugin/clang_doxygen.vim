@@ -80,9 +80,17 @@ else
 endif
 
 function! s:GenerateDoxygen()
-	python import sys
-	exe 'python sys.path = ["' . s:plugin_path . '"] + sys.path'
-	exe 'pyfile ' . s:plugin_path . '/clang_doxygen.py'
+  if !exists("g:initialised_clang_doxygen")
+    python import sys
+    exe 'python sys.path = ["' . s:plugin_path . '"] + sys.path'
+    exe 'pyfile ' . s:plugin_path . '/clang_doxygen.py'
+
+    python initialiseClangDoxygen()
+
+    if !exists("g:initialised_clang_doxygen")
+      return
+    endif
+  endif
 
   python generateDoxygen()
 endfunction

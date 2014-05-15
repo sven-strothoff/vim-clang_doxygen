@@ -7,8 +7,8 @@
 # All rights reserved.
 
 import vim
-from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKind
 import re
+from clang.cindex import Index, SourceLocation, Cursor, File, CursorKind, TypeKind, Config, LibclangError
 
 # Generate doxygen comments for a class declaration.
 def handleClassDecl(c):
@@ -252,3 +252,19 @@ def generateDoxygen():
   vim.current.window.cursor = (insertLine, 0)
   # Call snippet plugin
   vim.command('call clang_doxygen_snippets#' + vim.eval("g:clang_doxygen_snippet_plugin") + '#trigger(\'' + "\n".join(doxygenLines).replace("\\", "\\\\") + '\')')
+
+# Try to find liblang. Set library path if necessary.
+def initialiseClangDoxygen():
+  conf = Config()
+
+  if vim.eval("exists(\"g:clang_doxygen_libclang_library_path\")") != "0":
+    Config.set_library_path(vim.eval("g:clang_doxygen_libclang_library_path"))
+    conf.set_library_path(vim.eval("g:clang_doxygen_libclang_library_path"))
+
+  try:
+    conf.get_cindex_library()
+  except LibclangError as e:
+    print "Error: " + str(e)
+    return
+
+  vim.command("let g:initialised_clang_doxygen = 1")

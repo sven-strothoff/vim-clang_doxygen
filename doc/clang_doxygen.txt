@@ -66,6 +66,20 @@ comments, one of the supported snippet plugins has to be installed, see
 ==============================================================================
 4. Configuration				*clang_doxygen-configuration*
 
+					*'g:clang_doxygen_libclang_library_path'*
+'g:clang_doxygen_libclang_library_path'	string (default: unset)
+					global
+	If libClang can not be found automatically you have to set the path
+	where it can be found.  In most cases you should not need to set this
+	option.  If you however want to use a specific version of libClang or
+	your library is located in a non-standard location you can set the
+	path here.
+	This has to be set before using the clang doxygen plugin and can not
+	be changed after the plugin was loaded.
+	Example: If you are using LLVM 3.4 on Linux use: >
+		let g:clang_doxygen_libclang_library_path =
+		"/usr/lib/llvm-3.4/lib"
+
 					*'g:clang_doxygen_clang_args'*
 'g:clang_doxygen_clang_args'	list (default: [])
 				global
