@@ -222,6 +222,12 @@ def generateDoxygenForSourceLocation(line, col):
       continue
     elif c.kind == CursorKind.FUNCTION_DECL:
       return handleFunctionDecl(c)
+    elif c.kind == CursorKind.CXX_METHOD:
+      return handleFunctionDecl(c)
+    elif c.kind == CursorKind.CONSTRUCTOR:
+      return handleFunctionDecl(c)
+    elif c.kind == CursorKind.DESTRUCTOR:
+      return handleFunctionDecl(c)
     elif c.kind == CursorKind.FUNCTION_TEMPLATE:
       return handleFunctionTemplate(c)
     elif c.kind == CursorKind.CLASS_DECL:
