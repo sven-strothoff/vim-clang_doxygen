@@ -15,7 +15,7 @@ let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
 
 " A list of command line args to clang
 if !exists("g:clang_doxygen_clang_args")
-	let g:clang_doxygen_clang_args = []
+  let g:clang_doxygen_clang_args = []
 endif
 
 " Choose a snippet plugin
